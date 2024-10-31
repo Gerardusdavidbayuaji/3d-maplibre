@@ -1,13 +1,15 @@
-import React, { useEffect, useRef } from "react";
-import maplibregl from "maplibre-gl";
-import DeckGL from "@deck.gl/react";
 import { TerrainLayer } from "@deck.gl/geo-layers";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { useEffect, useRef } from "react";
+import maplibregl from "maplibre-gl";
+import DeckGL from "@deck.gl/react";
 
 const mapStyle =
   "https://api.maptiler.com/maps/satellite/style.json?key=AW8IuG306IIk8kNdxEw6";
-const terrainImage = "/waduk_sermo.png";
-const elevationImage = "/waduk_sermo.png";
+const terrainImage =
+  "http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Awaduk_sermo_new1&bbox=110.0981098109811%2C-7.840722%2C110.13058805880588%2C-7.806780678067805&width=768&height=455&srs=EPSG%3A4326&styles=&format=image%2Fpng";
+const elevationImage =
+  "http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Adem_waduk_sermo&bbox=110.0981098109811%2C-7.840722%2C110.13058805880588%2C-7.806780678067805&width=734&height=768&srs=EPSG%3A4326&styles=&format=image%2Fpng";
 
 const INITIAL_VIEW_STATE = {
   longitude: 110.11731582824113,
