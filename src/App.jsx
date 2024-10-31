@@ -3,20 +3,38 @@ import { TerrainLayer } from "@deck.gl/geo-layers";
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
 import DeckGL from "@deck.gl/react";
-import { Image } from "lucide-react";
+import { LucideMountainSnow } from "lucide-react";
 
 // URL untuk gaya peta dan gambar elevasi
+// NOTE TAMPILAN 3D SERMO DAN SEMPOR
+// SERMO:
+// texture: http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Awaduk_sermo_new1&bbox=110.0981098109811%2C-7.840722%2C110.13058805880588%2C-7.806780678067805&width=768&height=455&srs=EPSG%3A4326&styles=&format=image%2Fpng
+// elevation: http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Adem_waduk_sermo&bbox=110.0981098109811%2C-7.840722%2C110.13058805880588%2C-7.806780678067805&width=734&height=768&srs=EPSG%3A4326&styles=&format=image%2Fpng
+
+// SEMPOR:
+// texture: http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Awaduk_sempor_new1&bbox=109.462891%2C-7.572007200720072%2C109.514411%2C-7.532178217821777&width=768&height=455&srs=EPSG%3A4326&styles=&format=image%2Fpng
+// elevation: http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Adem_sempor&bbox=109.462891%2C-7.572007200720072%2C109.514411%2C-7.532178217821777&width=768&height=585&srs=EPSG%3A4326&styles=&format=image%2Fpng
+
+// NOTE KOORDINAT AWAL
+// SERMO:
+// x: 110.1173
+// y: -7.8233
+
+// SEMPOR:
+// x: 109.493804
+// y: -7.552214
+
 const MAP_STYLE_URL =
   "https://api.maptiler.com/maps/satellite/style.json?key=AW8IuG306IIk8kNdxEw6";
 const TERRAIN_TEXTURE_URL =
-  "http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Awaduk_sermo_new1&bbox=110.0981098109811%2C-7.840722%2C110.13058805880588%2C-7.806780678067805&width=768&height=455&srs=EPSG%3A4326&styles=&format=image%2Fpng";
+  "http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Awaduk_sempor_new1&bbox=109.462891%2C-7.572007200720072%2C109.514411%2C-7.532178217821777&width=768&height=455&srs=EPSG%3A4326&styles=&format=image%2Fpng";
 const ELEVATION_DATA_URL =
-  "http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Adem_waduk_sermo&bbox=110.0981098109811%2C-7.840722%2C110.13058805880588%2C-7.806780678067805&width=734&height=768&srs=EPSG%3A4326&styles=&format=image%2Fpng";
+  "http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Adem_sempor&bbox=109.462891%2C-7.572007200720072%2C109.514411%2C-7.532178217821777&width=768&height=585&srs=EPSG%3A4326&styles=&format=image%2Fpng";
 
 // State tampilan awal untuk MapLibre dan DeckGL
 const INITIAL_VIEW_STATE = {
-  longitude: 110.1173,
-  latitude: -7.8233,
+  longitude: 109.493804,
+  latitude: -7.552214,
   zoom: 13.5,
   bearing: 0,
   pitch: 0, // Awalnya tanpa efek pitch
@@ -72,7 +90,10 @@ const App = () => {
     id: "terrain-layer",
     elevationData: ELEVATION_DATA_URL,
     texture: TERRAIN_TEXTURE_URL,
-    bounds: [110.0981, -7.8411, 110.1306, -7.8068],
+    // bounds: [
+    //   110.0981098109811, -7.840722, 110.13058805880588, -7.806780678067805,
+    // ], // sermo
+    bounds: [109.462891, -7.572007200720072, 109.514411, -7.532178217821777], // sempor
     elevationDecoder: {
       rScaler: 1,
       gScaler: 0,
@@ -84,10 +105,6 @@ const App = () => {
   // Fungsi toggle efek terrain
   const toggleTerrain = () => {
     setIsTerrainActive((prev) => !prev);
-    setViewState((prevViewState) => ({
-      ...prevViewState,
-      pitch: isTerrainActive ? 0 : 45, // Set pitch untuk efek 3D
-    }));
   };
 
   return (
@@ -118,9 +135,11 @@ const App = () => {
       {/* Tombol toggle terrain */}
       <button
         onClick={toggleTerrain}
-        className="bg-white p-2 rounded-md shadow-lg absolute top-28 right-[9px]"
+        className={`p-2 rounded-md shadow-lg absolute top-28 right-[9px] ${
+          isTerrainActive ? "bg-[#FF7517]" : "bg-white"
+        }`}
       >
-        <Image className="w-4 h-4" />
+        <LucideMountainSnow className="w-4 h-4" />
       </button>
     </div>
   );
