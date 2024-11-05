@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { TerrainLayer } from "@deck.gl/geo-layers";
+import { LucideMountainSnow } from "lucide-react";
+import { Building } from "lucide-react";
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
 import DeckGL from "@deck.gl/react";
-import { LucideMountainSnow } from "lucide-react";
+import { GeoJsonLayer, ScatterplotLayer } from "deck.gl";
+import { data } from "autoprefixer";
 
 // URL untuk gaya peta dan gambar elevasi
 // NOTE TAMPILAN 3D SERMO DAN SEMPOR
@@ -30,6 +33,8 @@ const TERRAIN_TEXTURE_URL =
   "http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Awaduk_sempor_new1&bbox=109.462891%2C-7.572007200720072%2C109.514411%2C-7.532178217821777&width=768&height=455&srs=EPSG%3A4326&styles=&format=image%2Fpng";
 const ELEVATION_DATA_URL =
   "http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Adem_sempor&bbox=109.462891%2C-7.572007200720072%2C109.514411%2C-7.532178217821777&width=768&height=585&srs=EPSG%3A4326&styles=&format=image%2Fpng";
+const BANGUNAN_SEMPOR =
+  "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Abangunan_sempor&outputFormat=application%2Fjson";
 
 // State tampilan awal untuk MapLibre dan DeckGL
 const INITIAL_VIEW_STATE = {
@@ -48,6 +53,15 @@ const App = () => {
   const mapInstanceRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [isTerrainActive, setIsTerrainActive] = useState(false); // State efek terrain
+  const [buildingData, setBuildingData] = useState(null);
+  const [isBuildingActive, setIsBuildingActive] = useState(false);
+
+  useEffect(() => {
+    fetch(BANGUNAN_SEMPOR)
+      .then((response) => response.json())
+      .then((data) => setBuildingData(data))
+      .catch((error) => console.error("error fatching building data", error));
+  }, []);
 
   // Inisialisasi MapLibre dan sinkronisasi dengan DeckGL pada saat halaman dimuat
   useEffect(() => {
@@ -102,9 +116,39 @@ const App = () => {
     },
   });
 
-  // Fungsi toggle efek terrain
+  const buildingLayer = new GeoJsonLayer({
+    id: "building-layer",
+    data: buildingData,
+    extruded: true,
+    wireframe: false,
+    getFillColor: (f) => {
+      const high = f.properties.high || 0;
+
+      // Contoh pengaturan warna berdasarkan nilai high:
+      if (high >= 10) return [228, 97, 97];
+      // Merah muda untuk bangunan sangat tinggi (high >= 10)
+      else if (high >= 8) return [241, 185, 99];
+      // Oranye muda untuk bangunan tinggi (8 <= high < 10)
+      else if (high >= 6) return [255, 255, 157];
+      // Kuning muda untuk bangunan sedang tinggi (6 <= high < 8)
+      else if (high >= 4) return [160, 228, 176];
+      // Hijau muda untuk bangunan sedang (4 <= high < 6)
+      else if (high >= 2)
+        return [225, 215, 198]; // Abu-abu untuk bangunan rendah (2 <= high < 4)
+      else return [225, 215, 198]; // Biru untuk bangunan sangat rendah (high < 2)
+    },
+
+    getElevation: (f) => (f.properties.high ? f.properties.high * 1 : 3),
+  });
+
+  // Fungsi toggle terrain
   const toggleTerrain = () => {
     setIsTerrainActive((prev) => !prev);
+  };
+
+  // Fungsi toggle building
+  const toggleBuilding = () => {
+    setIsBuildingActive((prev) => !prev);
   };
 
   return (
@@ -116,7 +160,11 @@ const App = () => {
       <DeckGL
         viewState={viewState} // Sinkronisasi viewState untuk pergerakan yang lancar
         controller={true}
-        layers={isTerrainActive ? [terrainLayer] : []} // Tampilkan terrainLayer jika aktif
+        // layers={isTerrainActive ? [terrainLayer] : []} // Tampilkan terrainLayer jika aktif
+        layers={[
+          isTerrainActive ? terrainLayer : null,
+          isBuildingActive && buildingData ? buildingLayer : null,
+        ].filter(Boolean)}
         onViewStateChange={({ viewState }) => {
           setViewState(viewState);
           // Sinkronisasi tampilan MapLibre dengan tampilan DeckGL
@@ -133,14 +181,25 @@ const App = () => {
       />
 
       {/* Tombol toggle terrain */}
-      <button
-        onClick={toggleTerrain}
-        className={`p-2 rounded-md shadow-lg absolute top-28 right-[9px] ${
-          isTerrainActive ? "bg-[#FF7517]" : "bg-white"
-        }`}
-      >
-        <LucideMountainSnow className="w-4 h-4" />
-      </button>
+      <div className="space-y-10">
+        <button
+          onClick={toggleTerrain}
+          className={`p-2 rounded-md shadow-lg absolute top-28 right-[9px] ${
+            isTerrainActive ? "bg-[#FF7517]" : "bg-white"
+          }`}
+        >
+          <LucideMountainSnow className="w-4 h-4" />
+        </button>
+
+        <button
+          onClick={toggleBuilding}
+          className={`p-2 rounded-md shadow-lg absolute top-28 right-[9px] ${
+            isBuildingActive ? "bg-[#FF7517]" : "bg-white"
+          }`}
+        >
+          <Building className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 };
