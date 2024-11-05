@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
+
+import { GeoJsonLayer } from "deck.gl";
 import { TerrainLayer } from "@deck.gl/geo-layers";
-import { LucideMountainSnow } from "lucide-react";
-import { Building } from "lucide-react";
+import DeckGL from "@deck.gl/react";
+
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
-import DeckGL from "@deck.gl/react";
-import { GeoJsonLayer, ScatterplotLayer } from "deck.gl";
-import { data } from "autoprefixer";
+
+import { LucideMountainSnow } from "lucide-react";
+import { Building } from "lucide-react";
 
 // URL untuk gaya peta dan gambar elevasi
 // NOTE TAMPILAN 3D SERMO DAN SEMPOR
@@ -36,13 +38,12 @@ const ELEVATION_DATA_URL =
 const BANGUNAN_SEMPOR =
   "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Abangunan_sempor&outputFormat=application%2Fjson";
 
-// State tampilan awal untuk MapLibre dan DeckGL
 const INITIAL_VIEW_STATE = {
   longitude: 109.493804,
   latitude: -7.552214,
   zoom: 13.5,
   bearing: 0,
-  pitch: 0, // Awalnya tanpa efek pitch
+  pitch: 0,
   maxPitch: 80,
   minZoom: 2,
   maxZoom: 30,
@@ -52,7 +53,7 @@ const App = () => {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
-  const [isTerrainActive, setIsTerrainActive] = useState(false); // State efek terrain
+  const [isTerrainActive, setIsTerrainActive] = useState(false);
   const [buildingData, setBuildingData] = useState(null);
   const [isBuildingActive, setIsBuildingActive] = useState(false);
 
@@ -63,7 +64,6 @@ const App = () => {
       .catch((error) => console.error("error fatching building data", error));
   }, []);
 
-  // Inisialisasi MapLibre dan sinkronisasi dengan DeckGL pada saat halaman dimuat
   useEffect(() => {
     const mapInstance = new maplibregl.Map({
       container: mapContainerRef.current,
@@ -79,11 +79,8 @@ const App = () => {
     });
 
     mapInstanceRef.current = mapInstance;
-
-    // Tambahkan kontrol navigasi
     mapInstance.addControl(new maplibregl.NavigationControl(), "top-right");
 
-    // Sinkronisasi state tampilan antara MapLibre dan DeckGL
     mapInstance.on("move", () => {
       const { lng, lat } = mapInstance.getCenter();
       setViewState((prevViewState) => ({
@@ -124,50 +121,38 @@ const App = () => {
     getFillColor: (f) => {
       const high = f.properties.high || 0;
 
-      // Contoh pengaturan warna berdasarkan nilai high:
       if (high >= 10) return [228, 97, 97];
-      // Merah muda untuk bangunan sangat tinggi (high >= 10)
       else if (high >= 8) return [241, 185, 99];
-      // Oranye muda untuk bangunan tinggi (8 <= high < 10)
       else if (high >= 6) return [255, 255, 157];
-      // Kuning muda untuk bangunan sedang tinggi (6 <= high < 8)
       else if (high >= 4) return [160, 228, 176];
-      // Hijau muda untuk bangunan sedang (4 <= high < 6)
-      else if (high >= 2)
-        return [225, 215, 198]; // Abu-abu untuk bangunan rendah (2 <= high < 4)
-      else return [225, 215, 198]; // Biru untuk bangunan sangat rendah (high < 2)
+      else if (high >= 2) return [225, 215, 198];
+      else return [225, 215, 198];
     },
 
     getElevation: (f) => (f.properties.high ? f.properties.high * 1 : 3),
   });
 
-  // Fungsi toggle terrain
   const toggleTerrain = () => {
     setIsTerrainActive((prev) => !prev);
   };
 
-  // Fungsi toggle building
   const toggleBuilding = () => {
     setIsBuildingActive((prev) => !prev);
   };
 
   return (
     <div className="relative w-full h-screen">
-      {/* Kontainer MapLibre */}
       <div ref={mapContainerRef} className="absolute inset-0 w-full h-full" />
 
-      {/* Overlay DeckGL */}
       <DeckGL
-        viewState={viewState} // Sinkronisasi viewState untuk pergerakan yang lancar
+        viewState={viewState}
         controller={true}
-        // layers={isTerrainActive ? [terrainLayer] : []} // Tampilkan terrainLayer jika aktif
         layers={[
           isTerrainActive ? terrainLayer : null,
           isBuildingActive && buildingData ? buildingLayer : null,
         ].filter(Boolean)}
         onViewStateChange={({ viewState }) => {
           setViewState(viewState);
-          // Sinkronisasi tampilan MapLibre dengan tampilan DeckGL
           if (mapInstanceRef.current) {
             mapInstanceRef.current.jumpTo({
               center: [viewState.longitude, viewState.latitude],
@@ -180,7 +165,6 @@ const App = () => {
         style={{ position: "absolute", inset: 0 }}
       />
 
-      {/* Tombol toggle terrain */}
       <div className="space-y-10">
         <button
           onClick={toggleTerrain}
