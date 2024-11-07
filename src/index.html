@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>3D Terrain with Buildings</title>
+    <meta
+      property="og:description"
+      content="Go beyond hillshade and show elevation in actual 3D."
+    />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"
+    />
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body,
+      #map {
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      const map = (window.map = new maplibregl.Map({
+        container: "map",
+        zoom: 12,
+        center: [109.493804, -7.552214],
+        pitch: 70,
+        hash: true,
+        style: {
+          version: 8,
+          sources: {
+            osm: {
+              type: "raster",
+              tiles: [
+                "https://api.maptiler.com/maps/satellite/{z}/{x}/{y}@2x.jpg?key=AW8IuG306IIk8kNdxEw6",
+              ],
+              tileSize: 256,
+              attribution: "&copy; OpenStreetMap Contributors",
+              maxzoom: 19,
+            },
+            terrainSource: {
+              type: "raster-dem",
+              url: "https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=AW8IuG306IIk8kNdxEw6",
+              tileSize: 256,
+            },
+            hillshadeSource: {
+              type: "raster-dem",
+              url: "https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=AW8IuG306IIk8kNdxEw6",
+              tileSize: 256,
+            },
+            wadukSempor: {
+              type: "geojson",
+              data: "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Abatas_waduk_sempor&outputFormat=application%2Fjson",
+            },
+            bangunanSempor: {
+              type: "geojson",
+              data: "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Abangunan_sempor2&outputFormat=application%2Fjson",
+            },
+          },
+          layers: [
+            {
+              id: "osm",
+              type: "raster",
+              source: "osm",
+            },
+            {
+              id: "hills",
+              type: "hillshade",
+              source: "hillshadeSource",
+              layout: { visibility: "visible" },
+              paint: { "hillshade-shadow-color": "#473B24" },
+            },
+            {
+              id: "wadukSemporLine",
+              type: "line",
+              source: "wadukSempor",
+              layout: { "line-join": "round", "line-cap": "round" },
+              paint: { "line-color": "#FF0000", "line-width": 2 },
+            },
+            {
+              id: "bangunan3D",
+              type: "fill-extrusion",
+              source: "bangunanSempor",
+              paint: {
+                "fill-extrusion-color": "#ff4d4d",
+                "fill-extrusion-height": ["*", ["get", "high"], 2], // Gunakan properti `high` untuk tinggi bangunan
+                "fill-extrusion-base": 0,
+                "fill-extrusion-opacity": 1,
+              },
+            },
+          ],
+          terrain: { source: "terrainSource", exaggeration: 1 },
+          sky: {},
+        },
+        maxZoom: 18,
+        maxPitch: 85,
+      }));
+
+      map.addControl(
+        new maplibregl.NavigationControl({
+          visualizePitch: true,
+          showZoom: true,
+          showCompass: true,
+        })
+      );
+
+      map.addControl(
+        new maplibregl.TerrainControl({
+          source: "terrainSource",
+          exaggeration: 1,
+        })
+      );
+    </script>
+  </body>
+</html>
+
+<!-- tambahkan demo titik alat -->
+<!-- tambahkan demo area bangunan -->
+<!-- migrate ke react -->
