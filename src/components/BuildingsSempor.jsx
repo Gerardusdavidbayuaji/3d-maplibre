@@ -1,33 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-
-import { GeoJsonLayer } from "deck.gl";
-import { TerrainLayer } from "@deck.gl/geo-layers";
+import { GeoJsonLayer, TerrainLayer } from "deck.gl";
 import DeckGL from "@deck.gl/react";
-
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
-
-import { LucideMountainSnow } from "lucide-react";
-import { Building } from "lucide-react";
-
-// URL untuk gaya peta dan gambar elevasi
-// NOTE TAMPILAN 3D SERMO DAN SEMPOR
-// SERMO:
-// texture: http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Awaduk_sermo_new1&bbox=110.0981098109811%2C-7.840722%2C110.13058805880588%2C-7.806780678067805&width=768&height=455&srs=EPSG%3A4326&styles=&format=image%2Fpng
-// elevation: http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Adem_waduk_sermo&bbox=110.0981098109811%2C-7.840722%2C110.13058805880588%2C-7.806780678067805&width=734&height=768&srs=EPSG%3A4326&styles=&format=image%2Fpng
-
-// SEMPOR:
-// texture: http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Awaduk_sempor_new1&bbox=109.462891%2C-7.572007200720072%2C109.514411%2C-7.532178217821777&width=768&height=455&srs=EPSG%3A4326&styles=&format=image%2Fpng
-// elevation: http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Adem_sempor&bbox=109.462891%2C-7.572007200720072%2C109.514411%2C-7.532178217821777&width=768&height=585&srs=EPSG%3A4326&styles=&format=image%2Fpng
-
-// NOTE KOORDINAT AWAL
-// SERMO:
-// x: 110.1173
-// y: -7.8233
-
-// SEMPOR:
-// x: 109.493804
-// y: -7.552214
+import { LucideMountainSnow, Building } from "lucide-react";
 
 const MAP_STYLE_URL =
   "https://api.maptiler.com/maps/satellite/style.json?key=AW8IuG306IIk8kNdxEw6";
@@ -36,7 +12,7 @@ const TERRAIN_TEXTURE_URL =
 const ELEVATION_DATA_URL =
   "http://localhost:8080/geoserver/geovault/wms?service=WMS&version=1.1.0&request=GetMap&layers=geovault%3Adem_sempor&bbox=109.462891%2C-7.572007200720072%2C109.514411%2C-7.532178217821777&width=768&height=585&srs=EPSG%3A4326&styles=&format=image%2Fpng";
 const BANGUNAN_SEMPOR =
-  "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Abangunan_sempor&outputFormat=application%2Fjson";
+  "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Abangunan_sempor2&outputFormat=application%2Fjson";
 
 const INITIAL_VIEW_STATE = {
   longitude: 109.493804,
@@ -49,7 +25,7 @@ const INITIAL_VIEW_STATE = {
   maxZoom: 30,
 };
 
-const App = () => {
+const BuildingsSempor = () => {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
@@ -96,17 +72,13 @@ const App = () => {
     return () => mapInstance.remove();
   }, []);
 
-  // Definisikan Terrain Layer untuk DeckGL
   const terrainLayer = new TerrainLayer({
     id: "terrain-layer",
     elevationData: ELEVATION_DATA_URL,
     texture: TERRAIN_TEXTURE_URL,
-    // bounds: [
-    //   110.0981098109811, -7.840722, 110.13058805880588, -7.806780678067805,
-    // ], // sermo
-    bounds: [109.462891, -7.572007200720072, 109.514411, -7.532178217821777], // sempor
+    bounds: [109.462891, -7.572007200720072, 109.514411, -7.532178217821777],
     elevationDecoder: {
-      rScaler: 1,
+      rScaler: 1.3,
       gScaler: 0,
       bScaler: 0,
       offset: 0,
@@ -121,14 +93,12 @@ const App = () => {
     getFillColor: (f) => {
       const high = f.properties.high || 0;
 
-      if (high >= 10) return [228, 97, 97];
-      else if (high >= 8) return [241, 185, 99];
-      else if (high >= 6) return [255, 255, 157];
-      else if (high >= 4) return [160, 228, 176];
-      else if (high >= 2) return [225, 215, 198];
-      else return [225, 215, 198];
+      if (high >= 10) return [7, 190, 184];
+      else if (high >= 8) return [61, 204, 199];
+      else if (high >= 6) return [104, 216, 214];
+      else if (high >= 4) return [156, 234, 239];
+      else return [196, 255, 249];
     },
-
     getElevation: (f) => (f.properties.high ? f.properties.high * 1 : 3),
   });
 
@@ -188,4 +158,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default BuildingsSempor;
