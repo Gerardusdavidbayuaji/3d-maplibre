@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
@@ -20,8 +21,12 @@ const ModelSermo = () => {
   const [isWaterBoundariesActive, setIsWaterBoundariesActive] = useState(false);
   const [isBuildingActive, setIsBuildingActive] = useState(false);
   const [isTerrainActive, setIsTerrainActive] = useState(true);
-  const [isToolActive, setIsToolActive] = useState(false);
+  const [isSemporActive, setIsSemporActive] = useState(false);
+  const [isSermoActive, setIsSermoActive] = useState(true);
+  const [isToolActive, setIsToolActive] = useState(true);
+
   const mapRef = React.useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const map = new maplibregl.Map({
@@ -212,9 +217,41 @@ const ModelSermo = () => {
     toggleLayerVisibility("bangunan-3d", !isBuildingActive);
   };
 
+  const handleToggleSempor = () => {
+    setIsSemporActive(true);
+    setIsSermoActive(false);
+    navigate("/");
+  };
+
+  const handleToggleSermo = () => {
+    setIsSermoActive(true);
+    setIsSemporActive(false);
+    navigate("/sermo");
+  };
+
   return (
     <div className="relative w-full h-screen">
       <div id="map" className="w-full h-full" />
+
+      <div className="flex absolute top-5 rounded-md space-x-2 right-14">
+        <Button
+          onClick={handleToggleSempor}
+          className={`bg-white hover:bg-[#E6E6E6] text-[#333333] h-[30px] text-sm font-medium p-2 rounded shadow-none transition duration-500 ease-in-out ${
+            isSemporActive ? "bg-[#FF7517] hover:bg-[#E66A15]" : "bg-white"
+          }`}
+        >
+          Sempor
+        </Button>
+        <Button
+          onClick={handleToggleSermo}
+          className={`bg-white hover:bg-[#E6E6E6] text-[#333333] h-[30px] text-sm font-medium p-2 rounded shadow-none transition duration-500 ease-in-out ${
+            isSermoActive ? "bg-[#FF7517] hover:bg-[#E66A15]" : "bg-white"
+          }`}
+        >
+          Sermo
+        </Button>
+      </div>
+
       <div className="flex flex-col absolute top-5 right-[9px]">
         <Button
           onClick={handleToggleTerrain}
