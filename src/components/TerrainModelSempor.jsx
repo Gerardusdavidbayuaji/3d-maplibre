@@ -3,11 +3,16 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
 
 const TerrainModelSempor = () => {
+  const minLat = -7.599119;
+  const minLng = 109.43551;
+  const maxLat = -7.505082;
+  const maxLng = 109.542038;
+
   useEffect(() => {
     const map = new maplibregl.Map({
       container: "map",
       zoom: 14,
-      center: [109.48655, -7.55516],
+      center: [109.488958, -7.552119],
       pitch: 70,
       hash: true,
       style: {
@@ -51,7 +56,7 @@ const TerrainModelSempor = () => {
             type: "line",
             source: "batasWadukSempor",
             layout: { "line-join": "round", "line-cap": "round" },
-            paint: { "line-color": "#FF0000", "line-width": 0.5 },
+            paint: { "line-color": "#4ca5e9", "line-width": 0.5 },
           },
           {
             id: "alat-sempor-layer",
@@ -68,6 +73,10 @@ const TerrainModelSempor = () => {
       },
       maxZoom: 18,
       maxPitch: 85,
+      maxBounds: [
+        [minLng, minLat],
+        [maxLng, maxLat],
+      ],
     });
 
     map.addControl(
@@ -97,30 +106,28 @@ const TerrainModelSempor = () => {
     map.on("load", () => {
       loadImage();
 
-      // Add the 3D building layer using the 'high' property
       map.addLayer({
         id: "3d-buildings",
         type: "fill-extrusion",
-        source: "bangunanSempor", // Use the bangunanSempor GeoJSON source
+        source: "bangunanSempor",
         paint: {
           "fill-extrusion-color": [
-            "interpolate",
-            ["linear"],
-            ["*", ["get", "high"], 2], // Use the 'high' property for height
-            0,
-            "gray", // Jika ketinggian 0, warna gray
-            2,
-            "lightgray", // Untuk ketinggian 10, warna lightgray
-            4,
-            "yellow", // Untuk ketinggian 20, warna yellow
-            6,
-            "orange", // Untuk ketinggian 30, warna orange
-            8,
-            "red", // Untuk ketinggian 50, warna merah
-            10,
-            "purple", // Untuk ketinggian 100, warna purple
+            "case",
+            ["==", ["to-number", ["get", "high"]], 2],
+            "#f7eaa8",
+            ["==", ["to-number", ["get", "high"]], 4],
+            "#d4dfa1",
+            ["==", ["to-number", ["get", "high"]], 6],
+            "#b1d59b",
+            ["==", ["to-number", ["get", "high"]], 8],
+            "#8eca94",
+            ["==", ["to-number", ["get", "high"]], 10],
+            "#6bbf8e",
+            ["==", ["to-number", ["get", "high"]], 12],
+            "#48b587",
+            "#d6eadf",
           ],
-          "fill-extrusion-height": ["*", ["get", "high"], 2], // Set height using 'high' property
+          "fill-extrusion-height": ["to-number", ["get", "high"]],
           "fill-extrusion-base": 0,
         },
       });
