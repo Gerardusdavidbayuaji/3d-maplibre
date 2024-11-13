@@ -354,7 +354,7 @@ const ModelSempor = () => {
 
       <div
         className={`bg-white absolute top-5 left-[9px] w-52 h-1/2 rounded-md transition-transform duration-500 ease-in-out ${
-          isDataLayerVisible ? "translate-x-0" : "-translate-x-full left-0"
+          isDataLayerVisible ? "translate-x-0" : "-translate-x-full -left-0"
         }`}
       >
         <div className="flex bg-[#333333] text-[#FF7517] justify-center text-center p-3 rounded-t-md">
