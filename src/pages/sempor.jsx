@@ -261,7 +261,7 @@ const ModelSempor = () => {
     if (mapRef.current) {
       mapRef.current.flyTo({
         center: coordinates,
-        zoom: 16,
+        zoom: 18,
         speed: 0.5,
         pitch: 70,
         curve: 1.42,
