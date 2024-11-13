@@ -24,16 +24,16 @@ const ModelSempor = () => {
   const [isDataLayerVisible, setIsDataLayerVisible] = useState(false);
   const [isBuildingActive, setIsBuildingActive] = useState(false);
   const [isTerrainActive, setIsTerrainActive] = useState(true);
+  const [isRotateActive, setIsRotateActive] = useState(false);
   const [isSemporActive, setIsSemporActive] = useState(true);
   const [isSermoActive, setIsSermoActive] = useState(false);
-  const [isToolActive, setIsToolActive] = useState(false);
-  const [alatSemporData, setAlatSemporData] = useState([]);
   const [isFocusActive, setIsFocusActive] = useState(false);
-  const [isRotateActive, setIsRotateActive] = useState(false);
+  const [alatSemporData, setAlatSemporData] = useState([]);
+  const [isToolActive, setIsToolActive] = useState(false);
 
+  const rotationRequestRef = useRef(null);
   const mapRef = React.useRef(null);
   const navigate = useNavigate();
-  const rotationRequestRef = useRef(null);
 
   useEffect(() => {
     const map = new maplibregl.Map({
@@ -390,7 +390,9 @@ const ModelSempor = () => {
 
       <div
         className={`bg-white top-5 left-[9px] absolute w-60 h-1/2 rounded-md transition-transform duration-500 ease-in-out ${
-          isDataLayerVisible ? "translate-x-0" : "-translate-x-full -left-5"
+          isDataLayerVisible
+            ? "translate-x-0"
+            : "-translate-x-[calc(100%+1rem)]"
         }`}
       >
         <div className="flex bg-[#333333] text-[#FF7517] justify-center text-center p-3 rounded-t-md">
