@@ -390,7 +390,9 @@ const ModelSermo = () => {
 
       <div
         className={`bg-white top-5 left-[9px] absolute w-60 h-1/2 rounded-md transition-transform duration-500 ease-in-out ${
-          isDataLayerVisible ? "translate-x-0" : "-translate-x-full -left-5"
+          isDataLayerVisible
+            ? "translate-x-0"
+            : "-translate-x-[calc(100%+1rem)]"
         }`}
       >
         <div className="flex bg-[#333333] text-[#FF7517] justify-center text-center p-3 rounded-t-md">
