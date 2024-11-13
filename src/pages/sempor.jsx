@@ -400,7 +400,7 @@ const ModelSempor = () => {
           {alatSemporData.map((item) => (
             <div
               key={item.properties.no}
-              className="flex justify-between items-center text-center border border-[#333333] rounded-md p-2"
+              className="flex justify-between items-center text-center border border-[#333333] rounded-md p-2 overflow-y-auto"
             >
               <p className="text-sm">{item.properties.nama}</p>
               <div className="space-x-2">

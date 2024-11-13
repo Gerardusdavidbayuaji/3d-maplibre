@@ -8,28 +8,22 @@ import { Button } from "@/components/ui/button";
 import {
   LucideMountainSnow,
   AudioWaveform,
-  RefreshCcwDot,
   MapPinHouse,
   Building,
-  Focus,
-  Eye,
 } from "lucide-react";
 
-const minLat = -7.599119;
-const minLng = 109.43551;
-const maxLat = -7.505082;
-const maxLng = 109.542038;
+const minLat = -7.859083;
+const minLng = 110.080009;
+const maxLat = -7.788723;
+const maxLng = 110.148687;
 
-const ModelSempor = () => {
+const ModelSermo = () => {
   const [isWaterBoundariesActive, setIsWaterBoundariesActive] = useState(false);
   const [isBuildingActive, setIsBuildingActive] = useState(false);
   const [isTerrainActive, setIsTerrainActive] = useState(true);
-  const [isSemporActive, setIsSemporActive] = useState(true);
-  const [isSermoActive, setIsSermoActive] = useState(false);
-  const [isToolActive, setIsToolActive] = useState(false);
-  const [isDataLayerVisible, setIsDataLayerVisible] = useState(false);
-  const [alatSemporData, setAlatSemporData] = useState([]);
-  const [isRotateActive, setIsRotateActive] = useState(false);
+  const [isSemporActive, setIsSemporActive] = useState(false);
+  const [isSermoActive, setIsSermoActive] = useState(true);
+  const [isToolActive, setIsToolActive] = useState(true);
 
   const mapRef = React.useRef(null);
   const navigate = useNavigate();
@@ -37,8 +31,8 @@ const ModelSempor = () => {
   useEffect(() => {
     const map = new maplibregl.Map({
       container: "map",
-      zoom: 14.2,
-      center: [109.48839, -7.556628],
+      zoom: 15,
+      center: [110.11322114414544, -7.822850552983699],
       pitch: 65,
       hash: true,
       style: {
@@ -58,17 +52,17 @@ const ModelSempor = () => {
             url: "https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=AW8IuG306IIk8kNdxEw6",
             tileSize: 256,
           },
-          alatSempor: {
+          alatSermo: {
             type: "geojson",
-            data: "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Ademos_alat_sempor&outputFormat=application%2Fjson",
+            data: "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Acctv_sermo&outputFormat=application%2Fjson",
           },
-          batasWadukSempor: {
+          batasWadukSermo: {
             type: "geojson",
-            data: "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Abatas_waduk_sempor&outputFormat=application%2Fjson",
+            data: "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Abatas_waduk_sermo&outputFormat=application%2Fjson",
           },
-          bangunanSempor: {
+          bangunanSermo: {
             type: "geojson",
-            data: "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Abangunan_sempor2&outputFormat=application%2Fjson",
+            data: "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Abangunan_sermo&outputFormat=application%2Fjson",
           },
         },
         layers: [
@@ -78,20 +72,20 @@ const ModelSempor = () => {
             source: "osm",
           },
           {
-            id: "batas-badan-air-sempor",
+            id: "batas-badan-air-sermo",
             type: "line",
-            source: "batasWadukSempor",
+            source: "batasWadukSermo",
             layout: {
               "line-join": "round",
               "line-cap": "round",
               visibility: "none",
             },
-            paint: { "line-color": "#4ca5e9", "line-width": 0.5 },
+            paint: { "line-color": "#4ca5e9", "line-width": 0.7 },
           },
           {
-            id: "alat-sempor-layer",
+            id: "alat-sermo-layer",
             type: "symbol",
-            source: "alatSempor",
+            source: "alatSermo",
             layout: {
               "icon-image": "workshop-icon",
               "icon-size": 0.3,
@@ -101,7 +95,7 @@ const ModelSempor = () => {
           {
             id: "bangunan-3d",
             type: "fill-extrusion",
-            source: "bangunanSempor",
+            source: "bangunanSermo",
             layout: { visibility: "none" },
             paint: {
               "fill-extrusion-color": [
@@ -163,9 +157,9 @@ const ModelSempor = () => {
         closeOnClick: false,
       });
 
-      map.on("click", "alat-sempor-layer", (e) => {
+      map.on("click", "alat-sermo-layer", (e) => {
         const features = map.queryRenderedFeatures(e.point, {
-          layers: ["alat-sempor-layer"],
+          layers: ["alat-sermo-layer"],
         });
 
         if (features.length > 0) {
@@ -181,11 +175,11 @@ const ModelSempor = () => {
         }
       });
 
-      map.on("mouseenter", "alat-sempor-layer", () => {
+      map.on("mouseenter", "alat-sermo-layer", () => {
         map.getCanvas().style.cursor = "pointer";
       });
 
-      map.on("mouseleave", "alat-sempor-layer", () => {
+      map.on("mouseleave", "alat-sermo-layer", () => {
         popup.remove();
       });
     });
@@ -193,38 +187,6 @@ const ModelSempor = () => {
     mapRef.current = map;
     return () => map.remove();
   }, [isTerrainActive]);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await fetch(
-          "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Ademos_alat_sempor&outputFormat=application%2Fjson"
-        );
-        const data = await response.json();
-        setAlatSemporData(data.features || []);
-      } catch (error) {
-        console.log("upss.. error fetch data:", error);
-      }
-    }
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    let rotationInterval;
-
-    if (isRotateActive) {
-      rotationInterval = setInterval(() => {
-        if (mapRef.current) {
-          mapRef.current.rotateBy([0, 1], { duration: 2000 });
-        }
-      }, 2000);
-    } else {
-      clearInterval(rotationInterval);
-    }
-
-    return () => clearInterval(rotationInterval);
-  }, [isRotateActive]);
 
   const toggleLayerVisibility = (layerId, isActive) => {
     if (mapRef.current) {
@@ -242,13 +204,12 @@ const ModelSempor = () => {
 
   const handleToggleTool = () => {
     setIsToolActive((prev) => !prev);
-    setIsDataLayerVisible((prev) => !prev);
-    toggleLayerVisibility("alat-sempor-layer", !isToolActive);
+    toggleLayerVisibility("alat-sermo-layer", !isToolActive);
   };
 
   const handleToggleWaterBoundaries = () => {
     setIsWaterBoundariesActive((prev) => !prev);
-    toggleLayerVisibility("batas-badan-air-sempor", !isWaterBoundariesActive);
+    toggleLayerVisibility("batas-badan-air-sermo", !isWaterBoundariesActive);
   };
 
   const handleToggleBuildings = () => {
@@ -266,22 +227,6 @@ const ModelSempor = () => {
     setIsSermoActive(true);
     setIsSemporActive(false);
     navigate("/sermo");
-  };
-
-  const handleFlyTo = (coordinates) => {
-    if (mapRef.current) {
-      mapRef.current.flyTo({
-        center: coordinates,
-        zoom: 18,
-        speed: 1,
-        curve: 1.42,
-        essential: true,
-      });
-    }
-  };
-
-  const handleToggleRotation = () => {
-    setIsRotateActive((prev) => !prev);
   };
 
   return (
@@ -310,7 +255,7 @@ const ModelSempor = () => {
       <div className="flex flex-col absolute top-5 right-[9px]">
         <Button
           onClick={handleToggleTerrain}
-          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-b-none rounded-t-md shadow-none ${
+          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-b-none rounded-t-md ${
             isTerrainActive ? "bg-[#FF7517] hover:bg-[#E66A15]" : "bg-white"
           }`}
         >
@@ -318,7 +263,7 @@ const ModelSempor = () => {
         </Button>
         <Button
           onClick={handleToggleTool}
-          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-none shadow-none ${
+          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-none ${
             isToolActive ? "bg-[#FF7517] hover:bg-[#E66A15]" : "bg-white"
           }`}
         >
@@ -326,7 +271,7 @@ const ModelSempor = () => {
         </Button>
         <Button
           onClick={handleToggleWaterBoundaries}
-          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-none shadow-none ${
+          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-none ${
             isWaterBoundariesActive
               ? "bg-[#FF7517] hover:bg-[#E66A15]"
               : "bg-white"
@@ -336,58 +281,15 @@ const ModelSempor = () => {
         </Button>
         <Button
           onClick={handleToggleBuildings}
-          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-t-none rounded-b-md shadow-none ${
+          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-t-none rounded-b-md ${
             isBuildingActive ? "bg-[#FF7517] hover:bg-[#E66A15]" : "bg-white"
           }`}
         >
           <Building />
         </Button>
       </div>
-
-      <div
-        className={`bg-white absolute top-5 left-[9px] w-52 h-1/2 rounded-md transition-transform duration-500 ease-in-out ${
-          isDataLayerVisible ? "translate-x-0" : "-translate-x-full left-0"
-        }`}
-      >
-        <div className="flex bg-[#333333] text-[#FF7517] justify-center text-center p-3 rounded-t-md">
-          <h3>Fly to Data</h3>
-        </div>
-        <div className="p-3 text-[#333333] space-y-3">
-          {alatSemporData.map((item, index) => (
-            <div
-              key={index}
-              className="flex justify-between items-center text-center border border-[#333333] rounded-md p-2"
-            >
-              <p className="text-sm">{item.properties.nama}</p>
-              <div className="space-x-2">
-                <Button
-                  className="bg-transparent hover:bg-transparent text-[#333333] hover:text-[#FF7517] w-4 h-6 shadow-none"
-                  onClick={() =>
-                    handleFlyTo([
-                      parseFloat(item.properties.x),
-                      parseFloat(item.properties.y),
-                    ])
-                  }
-                >
-                  <Focus />
-                </Button>
-                <Button
-                  onClick={handleToggleRotation}
-                  className={`bg-white hover:bg-[#E6E6E6] text-[#333333] h-[30px] text-sm font-medium p-2 rounded shadow-none transition duration-500 ease-in-out ${
-                    isRotateActive
-                      ? "bg-[#FF7517] hover:bg-[#E66A15]"
-                      : "bg-white"
-                  }`}
-                >
-                  <RefreshCcwDot />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
 
-export default ModelSempor;
+export default ModelSermo;

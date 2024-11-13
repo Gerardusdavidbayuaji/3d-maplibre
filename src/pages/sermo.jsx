@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import {
   LucideMountainSnow,
   AudioWaveform,
+  RefreshCcwDot,
   MapPinHouse,
   Building,
+  Focus,
 } from "lucide-react";
 
 const minLat = -7.859083;
@@ -19,21 +21,26 @@ const maxLng = 110.148687;
 
 const ModelSermo = () => {
   const [isWaterBoundariesActive, setIsWaterBoundariesActive] = useState(false);
+  const [isDataLayerVisible, setIsDataLayerVisible] = useState(false);
   const [isBuildingActive, setIsBuildingActive] = useState(false);
   const [isTerrainActive, setIsTerrainActive] = useState(true);
   const [isSemporActive, setIsSemporActive] = useState(false);
   const [isSermoActive, setIsSermoActive] = useState(true);
-  const [isToolActive, setIsToolActive] = useState(true);
+  const [isToolActive, setIsToolActive] = useState(false);
+  const [alatSemporData, setAlatSemporData] = useState([]);
+  const [isFocusActive, setIsFocusActive] = useState(false);
+  const [isRotateActive, setIsRotateActive] = useState(false);
 
   const mapRef = React.useRef(null);
   const navigate = useNavigate();
+  const rotationRequestRef = useRef(null);
 
   useEffect(() => {
     const map = new maplibregl.Map({
       container: "map",
-      zoom: 15,
+      zoom: 14.9,
       center: [110.11322114414544, -7.822850552983699],
-      pitch: 65,
+      pitch: 72,
       hash: true,
       style: {
         version: 8,
@@ -80,7 +87,7 @@ const ModelSermo = () => {
               "line-cap": "round",
               visibility: "none",
             },
-            paint: { "line-color": "#4ca5e9", "line-width": 0.7 },
+            paint: { "line-color": "#4ca5e9", "line-width": 0.5 },
           },
           {
             id: "alat-sermo-layer",
@@ -164,12 +171,12 @@ const ModelSermo = () => {
 
         if (features.length > 0) {
           const feature = features[0];
-          const { nama, x, y } = feature.properties;
+          const { Nama, x, y } = feature.properties;
 
           popup
             .setLngLat([x, y])
             .setHTML(
-              `<strong> nama: ${nama}</strong><br/>longitude: ${x}<br/>latitude: ${y}`
+              `<strong> nama: ${Nama}</strong><br/>longitude: ${x}<br/>latitude: ${y}`
             )
             .addTo(map);
         }
@@ -185,8 +192,27 @@ const ModelSermo = () => {
     });
 
     mapRef.current = map;
-    return () => map.remove();
+
+    return () => {
+      map.remove();
+    };
   }, [isTerrainActive]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch(
+          "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Acctv_sermo&outputFormat=application%2Fjson"
+        );
+        const data = await response.json();
+        setAlatSemporData(data.features || []);
+      } catch (error) {
+        console.log("upss.. error fetch data:", error);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   const toggleLayerVisibility = (layerId, isActive) => {
     if (mapRef.current) {
@@ -204,6 +230,7 @@ const ModelSermo = () => {
 
   const handleToggleTool = () => {
     setIsToolActive((prev) => !prev);
+    setIsDataLayerVisible((prev) => !prev);
     toggleLayerVisibility("alat-sermo-layer", !isToolActive);
   };
 
@@ -229,9 +256,81 @@ const ModelSermo = () => {
     navigate("/sermo");
   };
 
+  const handleFlyTo = (no, coordinates) => {
+    setIsFocusActive(no);
+    if (mapRef.current) {
+      mapRef.current.flyTo({
+        center: coordinates,
+        zoom: 18,
+        speed: 0.3,
+        pitch: 60,
+        curve: 1.42,
+        essential: true,
+      });
+    }
+  };
+
+  const toggleRotateCamera = () => {
+    setIsRotateActive((prev) => !prev);
+  };
+
+  // const rotateCamera = (no) => {
+  //   setIsRotateActive(no);
+  //   if (mapRef.current) {
+  //     const rotateStep = () => {
+  //       if (!isDataLayerVisible) return;
+
+  //       const newRotation = (mapRef.current.getBearing() + 1) % 360;
+  //       mapRef.current.rotateTo(newRotation, { duration: 20 });
+  //       requestAnimationFrame(rotateStep);
+  //     };
+
+  //     rotateStep();
+  //   }
+  // };
+
+  // const rotateCamera = () => {
+  //   if (mapRef.current && isRotateActive) {
+  //     const rotateStep = () => {
+  //       if (!isRotateActive) return; // Stop rotation if isRotateActive is false
+  //       const newRotation = (mapRef.current.getBearing() + 1) % 360;
+  //       mapRef.current.rotateTo(newRotation, { duration: 16 });
+  //       requestAnimationFrame(rotateStep); // Continue rotation
+  //     };
+  //     rotateStep();
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   rotateCamera(); // Start rotation when isRotateActive changes to true
+  // }, [isRotateActive]);
+
+  useEffect(() => {
+    if (mapRef.current) {
+      const rotateStep = () => {
+        if (!isRotateActive) return;
+        const newRotation = (mapRef.current.getBearing() + 1) % 360;
+        mapRef.current.rotateTo(newRotation, { duration: 16 });
+        rotationRequestRef.current = requestAnimationFrame(rotateStep);
+      };
+
+      if (isRotateActive) {
+        rotationRequestRef.current = requestAnimationFrame(rotateStep);
+      } else if (rotationRequestRef.current) {
+        cancelAnimationFrame(rotationRequestRef.current);
+      }
+
+      return () => {
+        if (rotationRequestRef.current) {
+          cancelAnimationFrame(rotationRequestRef.current);
+        }
+      };
+    }
+  }, [isRotateActive]);
+
   return (
     <div className="relative w-full h-screen">
-      <div id="map" className="w-full h-full" />
+      <div id="map" className="w-full h-full relative" />
 
       <div className="flex absolute top-5 rounded-md space-x-2 right-14">
         <Button
@@ -255,7 +354,7 @@ const ModelSermo = () => {
       <div className="flex flex-col absolute top-5 right-[9px]">
         <Button
           onClick={handleToggleTerrain}
-          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-b-none rounded-t-md ${
+          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-b-none rounded-t-md shadow-none ${
             isTerrainActive ? "bg-[#FF7517] hover:bg-[#E66A15]" : "bg-white"
           }`}
         >
@@ -263,7 +362,7 @@ const ModelSermo = () => {
         </Button>
         <Button
           onClick={handleToggleTool}
-          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-none ${
+          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-none shadow-none ${
             isToolActive ? "bg-[#FF7517] hover:bg-[#E66A15]" : "bg-white"
           }`}
         >
@@ -271,7 +370,7 @@ const ModelSermo = () => {
         </Button>
         <Button
           onClick={handleToggleWaterBoundaries}
-          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-none ${
+          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-none shadow-none ${
             isWaterBoundariesActive
               ? "bg-[#FF7517] hover:bg-[#E66A15]"
               : "bg-white"
@@ -281,12 +380,62 @@ const ModelSermo = () => {
         </Button>
         <Button
           onClick={handleToggleBuildings}
-          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-t-none rounded-b-md ${
+          className={`bg-white hover:bg-[#E6E6E6] w-[29px] text-[#333333] h-[29px] rounded-t-none rounded-b-md shadow-none ${
             isBuildingActive ? "bg-[#FF7517] hover:bg-[#E66A15]" : "bg-white"
           }`}
         >
           <Building />
         </Button>
+      </div>
+
+      <div
+        className={`bg-white top-5 left-[9px] absolute w-60 h-1/2 rounded-md transition-transform duration-500 ease-in-out ${
+          isDataLayerVisible ? "translate-x-0" : "-translate-x-full -left-5"
+        }`}
+      >
+        <div className="flex bg-[#333333] text-[#FF7517] justify-center text-center p-3 rounded-t-md">
+          <h3>Fly to Data</h3>
+        </div>
+        <div className="p-3 text-[#333333] space-y-3 overflow-y-auto h-72">
+          {alatSemporData.map((item) => (
+            <div
+              key={item.properties.no}
+              className="flex justify-between items-center border border-[#333333] rounded-md p-2"
+            >
+              <p className="text-sm truncate ... w-32">
+                {item.properties.Nama}
+              </p>
+              <div className="space-x-2">
+                <Button
+                  key={item.properties.no}
+                  onClick={() =>
+                    handleFlyTo(item.properties.no, [
+                      item.properties.x,
+                      item.properties.y,
+                    ])
+                  }
+                  className={`bg-transparent hover:bg-transparent text-[#333333] hover:text-[#FF7517] w-4 h-6 shadow-none ${
+                    isFocusActive === item.properties.no
+                      ? "text-[#FF7517]"
+                      : "bg-transparent hover:bg-transparent"
+                  }`}
+                >
+                  <Focus />
+                </Button>
+                <Button
+                  onClick={toggleRotateCamera}
+                  className={`bg-transparent hover:bg-transparent w-4 h-6 shadow-none ${
+                    isRotateActive === item.properties.no
+                      ? "text-[#FF7517]"
+                      : "text-[#333333] hover:text-[#FF7517]"
+                  }`}
+                >
+                  <RefreshCcwDot />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
