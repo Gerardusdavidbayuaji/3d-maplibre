@@ -12,6 +12,7 @@ import {
   MapPinHouse,
   Building,
   Focus,
+  Eye,
 } from "lucide-react";
 
 const minLat = -7.599119;
@@ -21,16 +22,15 @@ const maxLng = 109.542038;
 
 const ModelSempor = () => {
   const [isWaterBoundariesActive, setIsWaterBoundariesActive] = useState(false);
-  const [isDataLayerVisible, setIsDataLayerVisible] = useState(false);
   const [isBuildingActive, setIsBuildingActive] = useState(false);
   const [isTerrainActive, setIsTerrainActive] = useState(true);
   const [isSemporActive, setIsSemporActive] = useState(true);
   const [isSermoActive, setIsSermoActive] = useState(false);
   const [isToolActive, setIsToolActive] = useState(false);
+  const [isDataLayerVisible, setIsDataLayerVisible] = useState(false);
   const [alatSemporData, setAlatSemporData] = useState([]);
   const [isRotateActive, setIsRotateActive] = useState(false);
 
-  const rotateAnimationRef = React.useRef(null);
   const mapRef = React.useRef(null);
   const navigate = useNavigate();
 
@@ -190,11 +190,8 @@ const ModelSempor = () => {
       });
     });
 
-    // return () => map.remove();
     mapRef.current = map;
-    return () => {
-      map.remove();
-    };
+    return () => map.remove();
   }, [isTerrainActive]);
 
   useEffect(() => {
@@ -212,6 +209,22 @@ const ModelSempor = () => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    let rotationInterval;
+
+    if (isRotateActive) {
+      rotationInterval = setInterval(() => {
+        if (mapRef.current) {
+          mapRef.current.rotateBy([0, 1], { duration: 2000 });
+        }
+      }, 2000);
+    } else {
+      clearInterval(rotationInterval);
+    }
+
+    return () => clearInterval(rotationInterval);
+  }, [isRotateActive]);
 
   const toggleLayerVisibility = (layerId, isActive) => {
     if (mapRef.current) {
@@ -261,35 +274,14 @@ const ModelSempor = () => {
         center: coordinates,
         zoom: 18,
         speed: 1,
-        pitch: 75,
         curve: 1.42,
         essential: true,
       });
     }
   };
 
-  const rotateCamera = () => {
-    if (mapRef.current) {
-      const rotateStep = () => {
-        if (!isDataLayerVisible) return;
-
-        const newRotation = (mapRef.current.getBearing() + 1) % 360;
-        mapRef.current.rotateTo(newRotation, { duration: 16 });
-        requestAnimationFrame(rotateStep);
-      };
-
-      rotateStep();
-    }
-  };
-
-  const toggleRotation = () => {
+  const handleToggleRotation = () => {
     setIsRotateActive((prev) => !prev);
-
-    if (!isRotateActive) {
-      rotateCamera();
-    } else {
-      cancelAnimationFrame(rotateAnimationRef.current);
-    }
   };
 
   return (
@@ -380,13 +372,12 @@ const ModelSempor = () => {
                   <Focus />
                 </Button>
                 <Button
-                  onClick={() =>
-                    rotateCamera([
-                      parseFloat(item.properties.x),
-                      parseFloat(item.properties.y),
-                    ])
-                  }
-                  className="bg-transparent hover:bg-transparent text-[#333333] hover:text-[#FF7517] w-4 h-6 shadow-none"
+                  onClick={handleToggleRotation}
+                  className={`bg-white hover:bg-[#E6E6E6] text-[#333333] h-[30px] text-sm font-medium p-2 rounded shadow-none transition duration-500 ease-in-out ${
+                    isRotateActive
+                      ? "bg-[#FF7517] hover:bg-[#E66A15]"
+                      : "bg-white"
+                  }`}
                 >
                   <RefreshCcwDot />
                 </Button>
