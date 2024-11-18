@@ -271,39 +271,8 @@ const ModelSempor = () => {
   };
 
   const toggleRotateCamera = () => {
-    setIsRotateActive((prev) => !prev); // Toggle rotasi
+    setIsRotateActive((prev) => !prev);
   };
-
-  // const rotateCamera = (no) => {
-  //   setIsRotateActive(no);
-  //   if (mapRef.current) {
-  //     const rotateStep = () => {
-  //       if (!isDataLayerVisible) return;
-
-  //       const newRotation = (mapRef.current.getBearing() + 1) % 360;
-  //       mapRef.current.rotateTo(newRotation, { duration: 20 });
-  //       requestAnimationFrame(rotateStep);
-  //     };
-
-  //     rotateStep();
-  //   }
-  // };
-
-  // const rotateCamera = () => {
-  //   if (mapRef.current && isRotateActive) {
-  //     const rotateStep = () => {
-  //       if (!isRotateActive) return; // Stop rotation if isRotateActive is false
-  //       const newRotation = (mapRef.current.getBearing() + 1) % 360;
-  //       mapRef.current.rotateTo(newRotation, { duration: 16 });
-  //       requestAnimationFrame(rotateStep); // Continue rotation
-  //     };
-  //     rotateStep();
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   rotateCamera(); // Start rotation when isRotateActive changes to true
-  // }, [isRotateActive]);
 
   useEffect(() => {
     if (mapRef.current) {
@@ -423,14 +392,6 @@ const ModelSempor = () => {
                   <Focus />
                 </Button>
                 <Button
-                  // key={item.properties.no}
-                  // onClick={() =>
-                  //   rotateCamera(item.properties.no, [
-                  //     parseFloat(item.properties.x),
-                  //     parseFloat(item.properties.y),
-                  //   ])
-                  // }
-
                   onClick={toggleRotateCamera}
                   className={`bg-transparent hover:bg-transparent w-4 h-6 shadow-none ${
                     isRotateActive === item.properties.no

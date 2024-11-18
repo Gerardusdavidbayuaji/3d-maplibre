@@ -25,11 +25,11 @@ const ModelSermo = () => {
   const [isBuildingActive, setIsBuildingActive] = useState(false);
   const [isTerrainActive, setIsTerrainActive] = useState(true);
   const [isSemporActive, setIsSemporActive] = useState(false);
-  const [isSermoActive, setIsSermoActive] = useState(true);
-  const [isToolActive, setIsToolActive] = useState(false);
-  const [alatSemporData, setAlatSemporData] = useState([]);
-  const [isFocusActive, setIsFocusActive] = useState(false);
   const [isRotateActive, setIsRotateActive] = useState(false);
+  const [isFocusActive, setIsFocusActive] = useState(false);
+  const [isSermoActive, setIsSermoActive] = useState(true);
+  const [alatSemporData, setAlatSemporData] = useState([]);
+  const [isToolActive, setIsToolActive] = useState(false);
 
   const mapRef = React.useRef(null);
   const navigate = useNavigate();
@@ -273,37 +273,6 @@ const ModelSermo = () => {
   const toggleRotateCamera = () => {
     setIsRotateActive((prev) => !prev);
   };
-
-  // const rotateCamera = (no) => {
-  //   setIsRotateActive(no);
-  //   if (mapRef.current) {
-  //     const rotateStep = () => {
-  //       if (!isDataLayerVisible) return;
-
-  //       const newRotation = (mapRef.current.getBearing() + 1) % 360;
-  //       mapRef.current.rotateTo(newRotation, { duration: 20 });
-  //       requestAnimationFrame(rotateStep);
-  //     };
-
-  //     rotateStep();
-  //   }
-  // };
-
-  // const rotateCamera = () => {
-  //   if (mapRef.current && isRotateActive) {
-  //     const rotateStep = () => {
-  //       if (!isRotateActive) return; // Stop rotation if isRotateActive is false
-  //       const newRotation = (mapRef.current.getBearing() + 1) % 360;
-  //       mapRef.current.rotateTo(newRotation, { duration: 16 });
-  //       requestAnimationFrame(rotateStep); // Continue rotation
-  //     };
-  //     rotateStep();
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   rotateCamera(); // Start rotation when isRotateActive changes to true
-  // }, [isRotateActive]);
 
   useEffect(() => {
     if (mapRef.current) {
