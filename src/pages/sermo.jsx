@@ -14,10 +14,10 @@ import {
   Focus,
 } from "lucide-react";
 
-const minLat = -7.859083;
-const minLng = 110.080009;
-const maxLat = -7.788723;
-const maxLng = 110.148687;
+// const minLat = -7.859083;
+// const minLng = 110.080009;
+// const maxLat = -7.788723;
+// const maxLng = 110.148687;
 
 const ModelSermo = () => {
   const [isWaterBoundariesActive, setIsWaterBoundariesActive] = useState(false);
@@ -61,7 +61,7 @@ const ModelSermo = () => {
           },
           alatSermo: {
             type: "geojson",
-            data: "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Acctv_sermo&outputFormat=application%2Fjson",
+            data: "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3APDA_PCH_SERMO_TEST&outputFormat=application%2Fjson",
           },
           batasWadukSermo: {
             type: "geojson",
@@ -133,10 +133,10 @@ const ModelSermo = () => {
       },
       maxZoom: 18,
       maxPitch: 85,
-      maxBounds: [
-        [minLng, minLat],
-        [maxLng, maxLat],
-      ],
+      // maxBounds: [
+      //   [minLng, minLat],
+      //   [maxLng, maxLat],
+      // ],
     });
 
     map.addControl(
@@ -171,12 +171,12 @@ const ModelSermo = () => {
 
         if (features.length > 0) {
           const feature = features[0];
-          const { Nama, x, y } = feature.properties;
+          const { waduk, x, y } = feature.properties;
 
           popup
             .setLngLat([x, y])
             .setHTML(
-              `<strong> nama: ${Nama}</strong><br/>longitude: ${x}<br/>latitude: ${y}`
+              `<strong> nama: ${waduk}</strong><br/>longitude: ${x}<br/>latitude: ${y}`
             )
             .addTo(map);
         }
@@ -202,7 +202,7 @@ const ModelSermo = () => {
     async function fetchData() {
       try {
         const response = await fetch(
-          "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3Acctv_sermo&outputFormat=application%2Fjson"
+          "http://localhost:8080/geoserver/geovault/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geovault%3APDA_PCH_SERMO_TEST&outputFormat=application%2Fjson"
         );
         const data = await response.json();
         setAlatSemporData(data.features || []);
@@ -261,7 +261,8 @@ const ModelSermo = () => {
     if (mapRef.current) {
       mapRef.current.flyTo({
         center: coordinates,
-        zoom: 18,
+        // zoom: 18,
+        zoom: 10,
         speed: 0.3,
         pitch: 60,
         curve: 1.42,
@@ -374,7 +375,7 @@ const ModelSermo = () => {
               className="flex justify-between items-center border border-[#333333] rounded-md p-2"
             >
               <p className="text-sm truncate ... w-32">
-                {item.properties.Nama}
+                {item.properties.waduk}
               </p>
               <div className="space-x-2">
                 <Button

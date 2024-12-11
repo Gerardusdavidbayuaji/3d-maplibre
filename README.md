@@ -45,12 +45,6 @@ Repository ini berisi kode untuk visualisasi model medan 3D (3D terrain model).
 
 # Installation
 
-Clone the project
-
-```bash
-git clone https://github.com/Gerardusdavidbayuaji/3d-maplibre
-```
-
 Go to the project directory
 
 ```bash
