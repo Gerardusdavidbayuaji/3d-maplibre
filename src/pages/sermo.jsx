@@ -14,10 +14,10 @@ import {
   Focus,
 } from "lucide-react";
 
-// const minLat = -7.859083;
-// const minLng = 110.080009;
-// const maxLat = -7.788723;
-// const maxLng = 110.148687;
+const minLat = -7.859083;
+const minLng = 110.080009;
+const maxLat = -7.788723;
+const maxLng = 110.148687;
 
 const ModelSermo = () => {
   const [isWaterBoundariesActive, setIsWaterBoundariesActive] = useState(false);
@@ -133,10 +133,10 @@ const ModelSermo = () => {
       },
       maxZoom: 18,
       maxPitch: 85,
-      // maxBounds: [
-      //   [minLng, minLat],
-      //   [maxLng, maxLat],
-      // ],
+      maxBounds: [
+        [minLng, minLat],
+        [maxLng, maxLat],
+      ],
     });
 
     map.addControl(
@@ -261,8 +261,8 @@ const ModelSermo = () => {
     if (mapRef.current) {
       mapRef.current.flyTo({
         center: coordinates,
-        // zoom: 18,
-        zoom: 10,
+        zoom: 18,
+        // zoom: 10,
         speed: 0.3,
         pitch: 60,
         curve: 1.42,
